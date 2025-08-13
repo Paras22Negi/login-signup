@@ -74,8 +74,9 @@ app.post('/verify-email', async (req, res) => {
       console.log(mailOptions);
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
+            
           console.log("Error sending email: ",error)
-          return res.status(500).json({ message: "Error sending email", error: error.message});
+          return res.status(500).json({ message: "Error sending email", error: error.messages});
         }
         console.log("Email sent: ", info.response);
         res.status(200).json({
