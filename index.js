@@ -76,7 +76,7 @@ app.post('/verify-email', async (req, res) => {
         if (error) {
             
           console.log("Error sending email: ",error)
-          return res.status(500).json({ message: "Error sending email", error: error.messages});
+          return res.status(500).json({ message: "Error sending email", error: error.message});
         }
         console.log("Email sent: ", info.response);
         res.status(200).json({
