@@ -260,7 +260,8 @@ app.get("/blogs", async (req, res) => {
 app.put('/blogs/:blogId',upload.single('image') ,async (req, res) => {
     try{
         const blogId = req.params.blogId;
-        const { title, content , image} = req.body;
+        const { title, content} = req.body;
+        const image = `/uploads/${req.file.filename}`;
         const blog = await blogModel.findById(blogId);
 
         if (!blog) {
