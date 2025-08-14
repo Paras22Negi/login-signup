@@ -280,7 +280,7 @@ app.put('/blogs/:blogId',upload.single('image') ,async (req, res) => {
         });
     }catch (error) {
         console.error("Error updating blog:", error);
-        res.status(500).json({ message: "Server error during blog update", error: error.message });
+        res.status(500).json({ message: "Server error during blog updatess", error: error.message });
     }
 });
     
