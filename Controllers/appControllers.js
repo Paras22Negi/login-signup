@@ -1,37 +1,14 @@
 const express = require('express');
-const app = express();
-const cors = require('cors');
 const userModel = require('./model/userModel');
 const blogModel = require('./model/blogModel');
 require('dotenv').config();
-const Port = process.env.PORT;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const upload = require('./multerStorage');
 const nodemailer = require('nodemailer');
-const mainRoutes = require('./Routes/mainRoutes');
 
 
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use('/uploads' ,express.static(path.join(__dirname, 'uploads')));
-
-
-app.use(cors({origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-app.use('/', mainRoutes)
-
-//nodeMailer
-
-app.post('/verify-email', async (req, res) => {
+const emailVerification = async (req, res) => {
     const {email} = req.body;
     console.log('data:', email)
     
@@ -68,9 +45,9 @@ app.post('/verify-email', async (req, res) => {
     }catch (error) {
         console.error("Error sending email:", error);
     }
-})
+}
 
-app.get('/users', async (req, res) => {
+const userDetails = {
     try {
         const user = await userModel.find().select('-password').populate('blog');
         res.json({
@@ -80,9 +57,9 @@ app.get('/users', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error fetching users", error });
     }
-});
+}
 
-app.post('/register', async (req, res) => {
+const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         const existingUser = await userModel.findOne({ email });
@@ -111,9 +88,9 @@ app.post('/register', async (req, res) => {
         console.error("Error creating user:", error);
         res.status(500).json({ message: "Error creating user", error: error.message });
     }
-});
+}
 
-app.post('/login', async (req, res) => {
+const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log("Login attempt with email:", email, " and password:", password);
@@ -151,10 +128,9 @@ app.post('/login', async (req, res) => {
         console.error("Error during login:", error);
         res.status(500).json({ message: "Error during login", error: error.message });
     }
-});
+}
 
-// create blog
-app.post('/blogs/:id',upload.single('image') , async (req, res) => {
+const createBlogs = async (req, res) => {
     try{
         const { title, content } = req.body;
         const image =`/uploads/${req.file.filename}`;
@@ -182,30 +158,9 @@ app.post('/blogs/:id',upload.single('image') , async (req, res) => {
         console.error("Error creating blog:", error);
         res.status(500).json({ message: "Server error during blog creation", error: error.message });
     }
-});
+}
 
-
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).send("No token received"); // <-- added return
-  }
-
-  try {
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded);
-    req.userId = decoded.userId;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Access denied. Invalid token." });
-    // <-- added return
-  }
-};
-
-
-// get blog by user id
-app.get("/blogs/:userId", verifyToken , async (req, res) => {
+const GetAllBlogsById = async (req, res) => {
   // More RESTful route
   try {
     const { userId } = req.params;
@@ -226,11 +181,9 @@ app.get("/blogs/:userId", verifyToken , async (req, res) => {
       error: error.message,
     });
   }
-});
+}
 
-
-// get all blogs
-app.get("/blogs", async (req, res) => {
+const allBlogs = async (req, res) => {
     try {
         const blogs = await blogModel.find().populate("user", "name email");
         res.json({
@@ -244,10 +197,9 @@ app.get("/blogs", async (req, res) => {
             error: error.message,
         });
     }
-});
+}
 
-// Update blog
-app.put('/blogs/:blogId',upload.single('image') , async (req, res) => {
+const updateBlogs = async (req, res) => {
     try{
         const blogId = req.params.blogId;
         const { title, content} = req.body;
@@ -272,11 +224,9 @@ app.put('/blogs/:blogId',upload.single('image') , async (req, res) => {
         console.error("Error updating blog:", error);
         res.status(500).json({ message: "Server error during blog updatess", error: error.message });
     }
-});
-    
-    
-// Delete blog
-app.delete('/blogs/:blogId', async (req, res) => {
+}
+
+const deleteBlogs = async (req, res) => {
     try {
         const blogId = req.params.blogId;
         const blog = await blogModel.findById(blogId);
@@ -296,9 +246,6 @@ app.delete('/blogs/:blogId', async (req, res) => {
         console.error("Error deleting blog:", error);
         res.status(500).json({ message: "Server error during blog deletion", error: error.message });
     }
-});
+}
 
-
-app.listen(Port, () => {
-    console.log(`Server is running on port ${Port}`);
-});
+module.exports = {emailVerification, userDetails, register, login, createBlogs, GetAllBlogsById, allBlogs, updateBlogs, deleteBlogs}
