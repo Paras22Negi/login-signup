@@ -47,7 +47,7 @@ const emailVerification = async (req, res) => {
     }
 }
 
-const userDetails = {
+const userDetails = async (req, res) => {
     try {
         const user = await userModel.find().select('-password').populate('blog');
         res.json({

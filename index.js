@@ -184,7 +184,6 @@ app.post('/blogs/:id',upload.single('image') , async (req, res) => {
     }
 });
 
-
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
