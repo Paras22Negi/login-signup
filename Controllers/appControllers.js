@@ -1,6 +1,6 @@
 const express = require('express');
-const userModel = require('./model/userModel');
-const blogModel = require('./model/blogModel');
+const userModel = require('../model/userModel');
+const blogModel = require('../model/blogModel');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
